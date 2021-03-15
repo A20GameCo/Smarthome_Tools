@@ -1,5 +1,6 @@
 import json
 import os
+from gadgetlib import CharacteristicIdentifier, CharacteristicUpdateStatus
 
 from flask import Flask, redirect, url_for, request, jsonify, Response
 from jsonschema import validate, ValidationError
@@ -339,7 +340,7 @@ def run_api(bridge, port: int):
                 status = "Config schema validation failed."
             except KeyError:
                 return generate_valid_response({"status": "Encountered error while trying to validate: missing scheme"},
-                                               'client_config.json',
+                                               'default_message.json',
                                                status_code=500)
 
             if not success:
@@ -356,6 +357,47 @@ def run_api(bridge, port: int):
         response: dict = {"status": f"Writing config on port '{serial_port}' was successful."}
         return generate_valid_response(response,
                                        'default_message.json')
+
+    @app.route('/gadgets/<gadget_name>/set_characteristic', methods=['POST'])
+    def set_gadget_characteristic(gadget_name: str):
+        """
+        Category: Gadgets
+        Title: Set characteristic of Gadget
+        Description: Sets the characteristic, contained in the request body, on the specified gadget
+        Input Schema: 'api_set_gadget_characteristic.json'
+        Output Schema: 'default_message.json'
+        Param <gadget_name>: Name of the gadget the characteristic shall be changed on
+        :return: Response to the request
+        """
+        json_payload = request.json
+
+        if json_payload:
+            try:
+                validate(json_payload, __schema_data['api_set_gadget_characteristic.json'])
+            except ValidationError:
+                return generate_valid_response({"status": "JSON schema validation failed!"},
+                                               'default_message.json',
+                                               status_code=400)
+
+        buf_characteristic_id = CharacteristicIdentifier(json_payload["characteristic"])
+        value = json_payload["value"]
+        result = bridge.update_characteristic_from_connector(gadget_name, buf_characteristic_id, value)
+        if result == CharacteristicUpdateStatus.update_successful or result == CharacteristicUpdateStatus.no_update_needed:
+            return generate_valid_response({"status": "Update successful or not needed"},
+                                           'default_message.json',
+                                           status_code=200)
+        if result == CharacteristicUpdateStatus.unknown_characteristic:
+            return generate_valid_response({"status": "provided an unknown characteristic"},
+                                           'default_message.json',
+                                           status_code=400)
+        if result == CharacteristicUpdateStatus.update_failed:
+            return generate_valid_response({"status": "Update failed, cause unknown"},
+                                           'default_message.json',
+                                           status_code=400)
+        if result == CharacteristicUpdateStatus.general_error:
+            return generate_valid_response({"status": "congrats you bricked the system, now go back and try again"},
+                                           'default_message.json',
+                                           status_code=500)
 
     # @app.route('/gadgets/all/<yolo>/<xxx>', methods=['POST', 'GET'])
     # def login():
