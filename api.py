@@ -375,13 +375,14 @@ def run_api(bridge, port: int):
             try:
                 validate(json_payload, __schema_data['api_set_gadget_characteristic.json'])
             except ValidationError:
-                return generate_valid_response({"status": "JSON schema validation failed!"},
+                response = {"status": f"Error setting gadget_characteristic for '{gadget_name}'" + f"json_payload: '{json_payload}'"}
+                return generate_valid_response(response,
                                                'default_message.json',
                                                status_code=400)
 
         buf_characteristic_id = CharacteristicIdentifier(json_payload["characteristic"])
         value = json_payload["value"]
-        result = bridge.update_characteristic_from_connector(gadget_name, buf_characteristic_id, value)
+        result = bridge.update_characteristic_from_connector(gadget_name, buf_characteristic_id, value, None)
         if result == CharacteristicUpdateStatus.update_successful or result == CharacteristicUpdateStatus.no_update_needed:
             return generate_valid_response({"status": "Update successful or not needed"},
                                            'default_message.json',
