@@ -215,22 +215,22 @@ class MainBridge:
                                                   1,
                                                   35)
                                ]))
-        self.add_gadget(Gadget("dummy_fan",
-                               GadgetIdentifier(3),
-                               "dummy_client1",
-                               1234567,
-                               [
-                                   Characteristic(CharacteristicIdentifier(1),
-                                                  0,
-                                                  100,
-                                                  1,
-                                                  35),
-                                   Characteristic(CharacteristicIdentifier(2),
-                                                  0,
-                                                  100,
-                                                  33,
-                                                  66)
-                               ]))
+        # self.add_gadget(Gadget("dummy_fan",
+        #                        GadgetIdentifier(3),
+        #                        "dummy_client1",
+        #                        1234567,
+        #                        [
+        #                            Characteristic(CharacteristicIdentifier(1),
+        #                                           0,
+        #                                           100,
+        #                                           1,
+        #                                           35),
+        #                            Characteristic(CharacteristicIdentifier(2),
+        #                                           0,
+        #                                           100,
+        #                                           33,
+        #                                           66)
+        #                        ]))
         self.__add_connector(HomeConnectorType(1), {"name": "test_connector1",
                                                     "ip": self.__mqtt_ip,
                                                     "port": self.__mqtt_port})

@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 flask = {version="*"}
+flask-cors = {version="*"}
 paho_mqtt = {version="*"}
 pyserial = {version="*"}
 requests = {version="*"}

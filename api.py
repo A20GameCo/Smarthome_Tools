@@ -3,6 +3,7 @@ import os
 from gadgetlib import CharacteristicIdentifier, CharacteristicUpdateStatus
 
 from flask import Flask, redirect, url_for, request, jsonify, Response
+from flask_cors import cross_origin
 from jsonschema import validate, ValidationError
 
 # https://pythonbasics.org/flask-http-methods/
@@ -31,7 +32,9 @@ def generate_valid_response(json_body: dict, json_schema_name: str, status_code:
 
         response.status_code = status_code
 
-        response.headers.add('Access-Control-Allow-Origin', '*')
+        # response.headers.add('Access-Control-Allow-Origin', '*')
+        # response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        # response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         return response
 
     except KeyError:
@@ -57,6 +60,7 @@ def run_api(bridge, port: int):
     app = Flask(__name__)
 
     @app.route('/')
+    @cross_origin()
     def root():
         """
         Flask API response method
@@ -74,6 +78,7 @@ def run_api(bridge, port: int):
         return generate_valid_response(res_data, "default_message.json")
 
     @app.route('/gadgets', methods=['GET'])
+    @cross_origin()
     def get_all_gadgets():
         """
         Flask API response method
@@ -98,6 +103,7 @@ def run_api(bridge, port: int):
         return generate_valid_response(buf_res, 'api_get_all_gadgets_response.json')
 
     @app.route('/clients', methods=['GET'])
+    @cross_origin()
     def get_all_clients():
         """
         Flask API response method
@@ -122,6 +128,7 @@ def run_api(bridge, port: int):
         return generate_valid_response(buf_res, 'api_get_all_clients_response.json')
 
     @app.route('/info', methods=['GET'])
+    @cross_origin()
     def get_info():
         """
         Flask API response method
@@ -153,6 +160,7 @@ def run_api(bridge, port: int):
         return generate_valid_response(buf_res, 'api_get_info_response.json')
 
     @app.route('/connectors', methods=['GET'])
+    @cross_origin()
     def get_all_connectors():
         """
         Flask API response method
@@ -177,6 +185,7 @@ def run_api(bridge, port: int):
         return generate_valid_response(buf_res, 'api_get_connectors_response.json')
 
     @app.route('/clients/<client_name>/restart', methods=['POST'])
+    @cross_origin()
     def restart_client(client_name):
         """
         Category: Clients
@@ -201,6 +210,7 @@ def run_api(bridge, port: int):
                                        status_code=400)
 
     @app.route('/system/get_serial_ports', methods=['GET'])
+    @cross_origin()
     def get_serial_ports():
         """
         Category: System
@@ -216,6 +226,7 @@ def run_api(bridge, port: int):
                                        'api_get_serial_ports_response.json')
 
     @app.route('/system/flash_software', methods=['POST'])
+    @cross_origin()
     def flash_software():
         """
         Category: Clients
@@ -248,6 +259,7 @@ def run_api(bridge, port: int):
         return generate_valid_response({"status": suc_resp}, 'default_message.json')
 
     @app.route('/system/configs', methods=['GET'])
+    @cross_origin()
     def get_config_names():
         """
         Category: System
@@ -261,6 +273,7 @@ def run_api(bridge, port: int):
         return generate_valid_response({"config_names": config_names}, 'api_get_config_names_response.json')
 
     @app.route('/system/configs/<config_name>', methods=['GET'])
+    @cross_origin()
     def get_config(config_name: str):
         """
         Category: System
@@ -275,6 +288,7 @@ def run_api(bridge, port: int):
         return generate_valid_response({"config_data": config_data}, 'api_get_config_data_response.json')
 
     @app.route('/clients/<client_name>/write_config', methods=['POST'])
+    @cross_origin()
     def write_config_to_network(client_name: str):
         """
         Category: Clients
@@ -316,6 +330,7 @@ def run_api(bridge, port: int):
                                        'default_message.json')
 
     @app.route('/system/write_config', methods=['POST'])
+    @cross_origin()
     def write_config_to_serial():
         """
         Category: Clients
@@ -359,6 +374,7 @@ def run_api(bridge, port: int):
                                        'default_message.json')
 
     @app.route('/gadgets/<gadget_name>/set_characteristic', methods=['POST'])
+    @cross_origin()
     def set_gadget_characteristic(gadget_name: str):
         """
         Category: Gadgets
@@ -370,6 +386,8 @@ def run_api(bridge, port: int):
         :return: Response to the request
         """
         json_payload = request.json
+
+        print(request.method)
 
         if json_payload:
             try:
