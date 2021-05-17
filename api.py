@@ -12,7 +12,6 @@ __new_request_received = 1
 __schema_data = {}
 
 
-
 def load_schemas() -> dict:
     schema_data = {}
     for f_name in os.listdir('json_schemas'):
@@ -60,7 +59,7 @@ def run_api(bridge, port: int):
 
     app = Flask(__name__)
 
-    app.config['CORS_HEADERS'] = 'Content-Type'
+    app.config['CORS_HEADERS'] = ['Content-Type', 'access-control-allow-origin']
 
     cors = CORS(app)
 
@@ -379,7 +378,7 @@ def run_api(bridge, port: int):
                                        'default_message.json')
 
     @app.route('/gadgets/<gadget_name>/set_characteristic', methods=['POST'])
-    @cross_origin(origin="*")
+    @cross_origin()
     def set_gadget_characteristic(gadget_name: str):
         """
         Category: Gadgets
