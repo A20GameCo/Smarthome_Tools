@@ -3,13 +3,14 @@ import os
 from gadgetlib import CharacteristicIdentifier, CharacteristicUpdateStatus
 
 from flask import Flask, redirect, url_for, request, jsonify, Response
-from flask_cors import cross_origin
+from flask_cors import cross_origin, CORS
 from jsonschema import validate, ValidationError
 
 # https://pythonbasics.org/flask-http-methods/
 
 __new_request_received = 1
 __schema_data = {}
+
 
 
 def load_schemas() -> dict:
@@ -58,6 +59,10 @@ def run_api(bridge, port: int):
     print(f"Loaded {len(__schema_data)} schemas.")
 
     app = Flask(__name__)
+
+    app.config['CORS_HEADERS'] = 'Content-Type'
+
+    cors = CORS(app)
 
     @app.route('/')
     @cross_origin()
@@ -374,7 +379,7 @@ def run_api(bridge, port: int):
                                        'default_message.json')
 
     @app.route('/gadgets/<gadget_name>/set_characteristic', methods=['POST'])
-    @cross_origin()
+    @cross_origin(origin="*")
     def set_gadget_characteristic(gadget_name: str):
         """
         Category: Gadgets
@@ -388,7 +393,6 @@ def run_api(bridge, port: int):
         json_payload = request.json
 
         print(request.method)
-
         if json_payload:
             try:
                 validate(json_payload, __schema_data['api_set_gadget_characteristic.json'])
